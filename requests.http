@@ -1,0 +1,12 @@
+@token = "am9obi5kb2VAbWFpbC5jb206YXplcnR5"
+@id= "742f6277b1c741719e81bb108198f0b6"
+
+### HOME
+GET  http://localhost:8000/
+
+### GET USERS
+GET  http://localhost:8000/users
+Authorization: Basic {{token}}
+
+### GET ONE USER
+GET  http://localhost:8000/users/{{id}}
