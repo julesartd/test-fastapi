@@ -1,7 +1,8 @@
+from typing import Protocol
 from models.user import User
 
 
-class AuthenticatorProtocol:
+class AuthenticatorProtocol(Protocol):
 
     def authenticate(self, token: str) -> User:
         raise NotImplementedError

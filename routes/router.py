@@ -1,11 +1,13 @@
+import uuid
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-
 from container import Container
-from middlewares.authentication_middleware import is_authenticated
-from dependency_injector.wiring import Provide
+from models.article import Article
 from protocols.authenticator_protocol import AuthenticatorProtocol
 from protocols.user_repository_protocol import UserRepositoryProtocol
+from middlewares.authentication_middleware import is_authenticated
+from dependency_injector.wiring import Provide, inject
+from repositories.in_memory_article_repository import InMemoryArticleRepository
 
 db = [
     {"id": "742f6277b1c741719e81bb108198f0b6","name": "John Doe","email": "john.doe@mail.com"},
@@ -16,31 +18,29 @@ db = [
 
 router = APIRouter()
 
-
 @router.get("/")
 async def home():
     return JSONResponse({"message": "Hello World"})
 
-
-@router.get("/users")
+@router.get("/users", response_model=None)
 async def get_users(is_authenticated: bool = Depends(is_authenticated)):
     if is_authenticated:
         return JSONResponse(db)
 
-@router.get("/users/{user_id}")
+@router.get("/users/{user_id}", response_model=None)
 async def get_user(user_id: str):
     for user in db:
         if user["id"] == user_id:
             return JSONResponse(user)
     return JSONResponse({"message": "User not found"}, status_code=404)
 
-@router.post("/login")
-async def login(credentials: dict,
-                user_repository: UserRepositoryProtocol = Depends(Provide[Container.user_repository]),
-                authenticator: AuthenticatorProtocol = Depends(Provide[Container.authenticator])
-                ):
+@router.post("/login", response_model=None)
+@inject
+async def login(
+    credentials: dict, 
+    user_repository: UserRepositoryProtocol = Depends(Provide[Container.user_repository]),
+    authenticator: AuthenticatorProtocol = Depends(Provide[Container.authenticator])):
                                                                
-
     user = user_repository.find_by_email(credentials["email"])
 
     if user is None or not user.is_valid_password(credentials["password"]):
@@ -48,3 +48,25 @@ async def login(credentials: dict,
 
     token = authenticator.generate_token(user)
     return JSONResponse({"token": token})
+
+@router.post("/articles", response_model=None)
+@inject
+async def create_article(
+    article_data: dict, 
+    is_authenticated: bool = Depends(is_authenticated),
+    article_repository: InMemoryArticleRepository = Depends(Provide[Container.article_repository])):
+
+    if is_authenticated:
+        article = Article(id=uuid.uuid4().hex, title=article_data["title"], content=article_data["content"])
+        article_repository.create(article)
+        return JSONResponse({"message": "Article created"})
+
+@router.get("/articles", response_model=None)
+@inject
+async def get_articles(
+    is_authenticated: bool = Depends(is_authenticated),
+    article_repository: InMemoryArticleRepository = Depends(Provide[Container.article_repository])):
+
+    if is_authenticated:
+        articles = article_repository.get_all()
+        return JSONResponse([article.dict() for article in articles])

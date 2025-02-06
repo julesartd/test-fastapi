@@ -1,4 +1,4 @@
-@token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMiLCJlbWFpbCI6ImpvaG4uZG9lQG1haWwuY29tIiwiZXhwIjoxNzM4NzczNTE5fQ.utnbCjPwrE9pdrr0WX7OWAodjweBPxvFPFZTPp7ileg"
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lIiwiZW1haWwiOiJqb2huLmRvZUBtYWlsLmNvbSIsImV4cCI6MTczODg0NTc1M30.hiyhrXDST5uHoADLGmPq2SmUU1HLdv1JjFtODLoQJbc
 @id=742f6277b1c741719e81bb108198f0b6
 
 ### HOME
@@ -20,4 +20,20 @@ Authorization: Bearer {{token}}
 ### GET ONE USER
 GET  http://localhost:8000/users/{{id}}
 Authorization: Bearer {{token}}
+
+### CREATE ARTICLE
+POST http://localhost:8000/articles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "title": "Article 1",
+    "content": "Content of article 1"
+}
+
+
+### GET ARTICLES
+GET  http://localhost:8000/articles
+Authorization: Bearer {{token}}
+
 
