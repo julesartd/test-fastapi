@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from user import User
+from models.user import User
 
 
 class UserRepositoryProtocol(Protocol):

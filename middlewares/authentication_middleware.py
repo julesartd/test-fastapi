@@ -1,29 +1,18 @@
+from socket import inet_aton
 from fastapi import HTTPException, Request
-
-from basic_authenticator import BasicAuthenticator
+from container import Container
+from protocols.authenticator_protocol import AuthenticatorProtocol
 from utils.extract_token import ExtractToken
-from repositories.in_memory_user_repository import InMemoryUserRepository
-from user import User
+from dependency_injector.wiring import Provide, inject
 
-user_repository = InMemoryUserRepository()
-user = user_repository.create(
-    User(
-        id="123",
-        email="john.doe@mail.com",
-        password="azerty",
-        name="John Doe"
-        )
-)
+@inject
+def is_authenticated(request: Request, authenticator: AuthenticatorProtocol = Provide[Container.authenticator]):
+    authorization = request.headers.get("Authorization")
 
-authenticator = BasicAuthenticator(user_repository=user_repository)
-
-def is_authenticated(request: Request):
-    credentials = request.headers.get("Authorization")
-
-    if not credentials:
+    if not authorization:
         raise HTTPException(status_code=403, detail="Not authenticated")
     
-    token = ExtractToken.extract_token(credentials)
+    token = ExtractToken.extract_token(authorization)
 
     if not token:
         raise HTTPException(status_code=403, detail="Not authenticated")

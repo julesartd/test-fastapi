@@ -14,6 +14,6 @@ class BasicAuthenticator:
         user = self.user_repository.find_by_email(email)
 
         if user is None or password != user.password:
-            raise Exception("Invalid credentials")
+            raise ValueError("Invalid credentials")
         
         return user
